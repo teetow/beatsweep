@@ -1,8 +1,12 @@
+import { NodeRepr_t } from "@elemaudio/core";
 import { useEffect, useState } from "react";
 import { useDebounce, useKey, useRaf } from "rooks";
 import { globalCss, styled } from "../stitches.config";
 import "./App.css";
 import tick from "./assets/tick.wav";
+import useElementary from "./lib/useElementary";
+import useMetronome from "./lib/useMetronome";
+import { bpmToHz } from "./lib/utils";
 import Circle from "./ui/Circle";
 import Debug from "./ui/Debug";
 import Transport from "./ui/Transport";
@@ -81,6 +85,8 @@ function App() {
   const [isMuted, setIsMuted] = useState(true);
 
   const senseVal = calcIsHit(period)[0];
+
+  useMetronome({ bpm });
 
   useRaf(() => {
     setPeriod((Date.now() / tickInterval) % 1);

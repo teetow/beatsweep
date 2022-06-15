@@ -22,7 +22,6 @@
   },
   "include": [
     "src",
-    "src/types",
     "stitches.config.ts",
   ],
   "references": [
