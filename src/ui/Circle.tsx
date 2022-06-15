@@ -21,16 +21,25 @@ const CircleView = styled("circle", {
 
 type CircleProps = {
   size: number;
-  period?: number;
+
   color?: string;
+  period?: number;
+  rotRadius?: number;
 };
 
-const Circle = ({ size, period, color }: CircleProps) => {
+const Circle = ({ size, color, period = 0, rotRadius = 0 }: CircleProps) => {
+  const transProps = [
+    `translateX(-${rotRadius}px)`,
+    `rotate(${period * 360}deg)`,
+  ].join(" ");
   return (
     <SvgView
-      css={{ size: size, fill: color }}
-      // style={{ transform: translateProps(period || 0) } as CSSProperties}
-      style={{ transform: `rotate(${period || 0 * 360}deg)` }}
+      css={{
+        size: size,
+        fill: color,
+        transformOrigin: `calc(50% + ${rotRadius}px) 50%`,
+      }}
+      style={{ transform: transProps }}
     >
       <CircleView
         className="circle"
