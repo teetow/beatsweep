@@ -1,12 +1,9 @@
-import { NodeRepr_t } from "@elemaudio/core";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDebounce, useKey, useRaf } from "rooks";
 import { globalCss, styled } from "../stitches.config";
-import "./App.css";
 import tick from "./assets/tick.wav";
-import useElementary from "./lib/useElementary";
+import { bpm, fps, frameLen } from "./config";
 import useMetronome from "./lib/useMetronome";
-import { bpmToHz } from "./lib/utils";
 import Circle from "./ui/Circle";
 import Debug from "./ui/Debug";
 import Transport from "./ui/Transport";
@@ -26,9 +23,6 @@ const bodyStyles = globalCss({
   },
 });
 
-const fps = 60;
-const frameLen = 8;
-const bpm = 75;
 const tickInterval = 60000 / bpm;
 
 const PlayField = styled("div", {
@@ -67,60 +61,45 @@ const calcIsHit = (
   period = 0.5,
   threshold = 1 / fps
 ): [number, boolean] => {
-  // console.log(value, period, threshold);
   const val = period - Math.abs(value - 0.5);
   const isHit = val < threshold;
-  // console.log(val, isHit, isHit ? "color: green" : "");
   return [val, isHit];
-  // return Math.abs((value - 0.5) % period) < threshold;
 };
-
-// Math.abs(period % 0.5) <= 1 / fps
 
 function App() {
   const [period, setPeriod] = useState(0);
   const [isBeat, setIsBeat] = useState(false);
   const [isHit, setIsHit] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [lastSync, setLastSync] = useState(Date.now);
 
   const senseVal = calcIsHit(period)[0];
 
-  useMetronome({ bpm });
-
   useRaf(() => {
-    setPeriod((Date.now() / tickInterval) % 1);
+    setPeriod(((Date.now() - lastSync) / tickInterval) % 1);
   }, true);
 
-  useEffect(() => {
-    if (isBeat === false && calcIsHit(period)[1]) {
-      setIsBeat(true);
-      globalThis.setTimeout(() => setIsBeat(false), frameLen);
+  const playTick = () => {
+    if (!isMuted) {
+      t.play();
     }
-  }, [period]);
+    setIsBeat(true);
+    setLastSync(Date.now());
+    globalThis.setTimeout(() => setIsBeat(false), frameLen * 8);
+  };
 
-  const playTick = useDebounce(() => t.play(), frameLen, { leading: true });
-
-  useEffect(() => {
-    if (isBeat && hasInteracted && !isMuted) {
-      playTick();
-    }
-  }, [isBeat]);
+  useMetronome({ bpm, onMetro: playTick });
 
   const onKey = () => {
-    if (!hasInteracted) setHasInteracted(true);
-
     if (isHit === false && isBeat) {
       setIsHit(true);
-      globalThis.setTimeout(() => setIsHit(false), frameLen);
+      globalThis.setTimeout(() => setIsHit(false), frameLen * 8);
     }
   };
 
   useKey("f", onKey, { eventTypes: ["keydown"] });
 
   bodyStyles();
-
-  // console.log(period.toPrecision(1));
 
   return (
     <AppView>
@@ -132,13 +111,21 @@ function App() {
         period={period}
         isMuted={isMuted}
         onToggleMuted={() => {
-          setHasInteracted(true);
           setIsMuted(!isMuted);
         }}
         className="transport"
       />
-      <PlayField css={{ backgroundColor: isHit ? "$tomato4" : "$green10" }}>
-        <Circle size={48} color={isBeat ? "$tomato8" : "$tomato7"} />
+      <PlayField
+        css={{
+          backgroundColor: isHit ? "$green10" : "$green4",
+          transition: isHit ? "0" : "0.28s",
+        }}
+      >
+        <Circle
+          size={48}
+          color={isBeat ? "$tomato9" : "$tomato7"}
+          css={{ transition: `fill ${isBeat ? "0" : "0.12s"}` }}
+        />
         <Circle size={16} rotRadius={32} color="$green11" period={period} />
       </PlayField>
     </AppView>

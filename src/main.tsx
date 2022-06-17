@@ -1,11 +1,14 @@
-import WebRenderer from "@elemaudio/web-renderer";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import useCore from "./lib/useCore";
+import Splash from "./ui/Splash";
+
+const root = ReactDOM.createRoot(document.getElementById("root")!);
 
 const ctx = new AudioContext();
-const core = new WebRenderer();
+const core = useCore();
 
 (async function main() {
   let node = await core.initialize(ctx, {
@@ -17,8 +20,20 @@ const core = new WebRenderer();
   node.connect(ctx.destination);
 })();
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const renderApp = () => {
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+};
+
+core.on("load", () => {
+  if (ctx.state !== "running") {
+    root.render(<Splash />);
+
+    ctx.resume().then(() => renderApp());
+  } else {
+    renderApp();
+  }
+});

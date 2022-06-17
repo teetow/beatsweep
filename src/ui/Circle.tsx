@@ -1,16 +1,6 @@
 import { CSSProperties, ReactNode } from "react";
 import { styled } from "../../stitches.config";
 
-const p2c = (a: number, r: number) => {
-  //x = r × cos( θ ) y = r × sin( θ )
-  return [r * Math.cos(a), r * Math.sin(a)];
-};
-
-const translateProps = (period: number) =>
-  `translate(${p2c(period, 16)
-    .map((x) => `${x}px`)
-    .join(", ")})`;
-
 const SvgView = styled("svg", {
   viewBox: "0 0 48 48",
 });
@@ -25,9 +15,17 @@ type CircleProps = {
   color?: string;
   period?: number;
   rotRadius?: number;
+
+  css?: CSSProperties;
 };
 
-const Circle = ({ size, color, period = 0, rotRadius = 0 }: CircleProps) => {
+const Circle = ({
+  size,
+  color,
+  period = 0,
+  rotRadius = 0,
+  css,
+}: CircleProps) => {
   const transProps = [
     `translateX(-${rotRadius}px)`,
     `rotate(${period * 360}deg)`,
@@ -35,6 +33,7 @@ const Circle = ({ size, color, period = 0, rotRadius = 0 }: CircleProps) => {
   return (
     <SvgView
       css={{
+        ...css,
         size: size,
         fill: color,
         transformOrigin: `calc(50% + ${rotRadius}px) 50%`,
@@ -46,11 +45,10 @@ const Circle = ({ size, color, period = 0, rotRadius = 0 }: CircleProps) => {
         r={size * 0.5}
         cx={size * 0.5}
         cy={size * 0.5}
-        css={{ fill: color }}
+        css={{ fill: color, transition: "inherit" }}
       />
     </SvgView>
   );
 };
 
-// export default styled(Circle);
 export default Circle;
