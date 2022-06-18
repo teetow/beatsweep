@@ -1,5 +1,13 @@
 import { styled } from "../../stitches.config";
 
-const Splash = styled("div", {});
+const SplashView = styled("div", { display: "grid", placeItems: "center" });
 
-export default () => <Splash>Hwaiting...</Splash>;
+type Props = {
+  onClick: () => void;
+};
+
+export default ({ onClick }: Props) => (
+  <SplashView>
+    <button onClick={onClick}>Hwaiting...</button>
+  </SplashView>
+);

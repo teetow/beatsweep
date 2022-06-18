@@ -6,6 +6,7 @@ import { bpm, fps, frameLen } from "./config";
 import useMetronome from "./lib/useMetronome";
 import Circle from "./ui/Circle";
 import Debug from "./ui/Debug";
+import Player from "./ui/Player";
 import Transport from "./ui/Transport";
 
 const bodyStyles = globalCss({
@@ -121,12 +122,7 @@ function App() {
           transition: isHit ? "0" : "0.28s",
         }}
       >
-        <Circle
-          size={48}
-          color={isBeat ? "$tomato9" : "$tomato7"}
-          css={{ transition: `fill ${isBeat ? "0" : "0.12s"}` }}
-        />
-        <Circle size={16} rotRadius={32} color="$green11" period={period} />
+        <Player isBeat={isBeat} period={period} />
       </PlayField>
     </AppView>
   );

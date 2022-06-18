@@ -28,11 +28,13 @@ const renderApp = () => {
   );
 };
 
+const tryElementary = () => {
+  ctx.resume().then(() => renderApp());
+};
+
 core.on("load", () => {
   if (ctx.state !== "running") {
-    root.render(<Splash />);
-
-    ctx.resume().then(() => renderApp());
+    root.render(<Splash onClick={tryElementary} />);
   } else {
     renderApp();
   }
