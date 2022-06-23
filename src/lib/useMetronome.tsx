@@ -6,9 +6,9 @@ import { bpmToHz, bpmToMs } from "./utils";
 
 type Props = {
   bpm: number;
-  subdiv: number;
-  measures: number;
   onMetro: () => void;
+  subdiv?: number;
+  measures?: number;
 };
 
 let metroCallback = () => {};
