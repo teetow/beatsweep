@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { useDebounce, useKey, useRaf } from "rooks";
+import { useEffect, useState } from "react";
+import { useKey, useRaf } from "rooks";
 import { globalCss, styled } from "../stitches.config";
 import tick from "./assets/tick.wav";
-import { bpm, fps, frameLen } from "./config";
+import { bpm as defaultBpm, fps, frameLen } from "./config";
 import useMetronome from "./lib/useMetronome";
-import Circle from "./ui/Circle";
+import { bpmToMs } from "./lib/utils";
 import Debug from "./ui/Debug";
 import Player from "./ui/Player";
+import Tempo from "./ui/Tempo";
 import Transport from "./ui/Transport";
 
 const bodyStyles = globalCss({
@@ -14,7 +15,7 @@ const bodyStyles = globalCss({
     height: "100%",
   },
   body: {
-    backgroundColor: "$tomato2",
+    backgroundColor: "$sky3",
     height: "100%",
     display: "grid",
     justifyContent: "stretch",
@@ -23,8 +24,6 @@ const bodyStyles = globalCss({
     padding: "1em",
   },
 });
-
-const tickInterval = 60000 / bpm;
 
 const PlayField = styled("div", {
   display: "grid",
@@ -44,11 +43,8 @@ const AppView = styled("div", {
   placeItems: "center",
   gridTemplateAreas: `"debug" "main"  "transport"`,
   gridTemplateRows: "auto 1fr",
-  "& > *": {
-    gridArea: "main",
-  },
+
   "& > .debug": {
-    gridArea: "debug",
     justifySelf: "stretch",
     textAlign: "center",
   },
@@ -57,17 +53,14 @@ const AppView = styled("div", {
   },
 });
 
-const calcIsHit = (
-  value: number,
-  period = 0.5,
-  threshold = 1 / fps
-): [number, boolean] => {
+const calcIsHit = (value: number, period = 0.5, threshold = 1 / fps): [number, boolean] => {
   const val = period - Math.abs(value - 0.5);
   const isHit = val < threshold;
   return [val, isHit];
 };
 
 function App() {
+  const [bpm, setBpm] = useState(defaultBpm);
   const [period, setPeriod] = useState(0);
   const [isBeat, setIsBeat] = useState(false);
   const [isHit, setIsHit] = useState(false);
@@ -77,7 +70,8 @@ function App() {
   const senseVal = calcIsHit(period)[0];
 
   useRaf(() => {
-    setPeriod(((Date.now() - lastSync) / tickInterval) % 1);
+    const tempo = Math.min(bpm / 2, 999);
+    setPeriod(((Date.now() - lastSync) / (60000 / tempo)) % 1);
   }, true);
 
   const playTick = () => {
@@ -106,7 +100,6 @@ function App() {
     <AppView>
       <Debug className="debug">
         <div>{(Math.ceil(period * 1000) / 1000).toFixed(3)}</div>
-        <div>{((senseVal * 1000) / 1000).toFixed(3)}</div>
       </Debug>
       <Transport
         period={period}
@@ -116,6 +109,7 @@ function App() {
         }}
         className="transport"
       />
+      <Tempo tempo={defaultBpm} onSetTempo={(bpm) => setBpm(bpm)} />
       <PlayField
         css={{
           backgroundColor: isHit ? "$green10" : "$green4",

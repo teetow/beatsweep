@@ -17,7 +17,7 @@ const Player = ({ isBeat, period }: Props) => {
           transition: `fill ${isBeat ? "0" : "0.12s"}`,
         }}
       />
-      <Sprite sprite="orb" rotation={period} />
+      <Sprite sprite="orb" rotation={period} css={{ position: "relative", left: "25%" }} />
     </>
   );
 };
